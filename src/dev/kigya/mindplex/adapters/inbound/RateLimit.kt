@@ -8,12 +8,9 @@ import kotlin.time.Duration.Companion.seconds
 fun Application.configureRateLimit() {
     install(RateLimit) {
         register(RateLimitName(RateLimitKey.QUESTIONS)) {
-            requestKey { call ->
-                call.request.origin.remoteHost
-            }
             rateLimiter(
-                limit = 1,
-                refillPeriod = 5.seconds,
+                limit = 64,
+                refillPeriod = 1.seconds,
             )
         }
     }
