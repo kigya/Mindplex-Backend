@@ -1,0 +1,7 @@
+ktor:
+    application:
+        modules:
+            - dev.kigya.mindplex.main.ApplicationKt.module
+    deployment:
+        host: "127.0.0.1"
+        port: 8080
