@@ -1,0 +1,50 @@
+openapi: 3.0.3
+info:
+  title: Mindplex API
+  description: Backend for Mindplex-Multiplatform App
+  version: "1.0.0"
+  contact:
+    name: "Mindplex Support"
+    url: ""
+    email: "kirillborichevskiy@gmail.com"
+
+servers:
+  - url: https://mindplex-backend.onrender.com
+    description: Render server
+
+paths:
+  /questions:
+    get:
+      tags:
+        - "Questions"
+      summary: "Get Questions"
+      description: "Returns a list of questions."
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Question'
+
+components:
+  schemas:
+    Question:
+      type: object
+      properties:
+        type:
+          type: string
+        difficulty:
+          type: string
+        category:
+          type: string
+        question:
+          type: string
+        correct_answer:
+          type: string
+        incorrect_answers:
+          type: array
+          items:
+            type: string
