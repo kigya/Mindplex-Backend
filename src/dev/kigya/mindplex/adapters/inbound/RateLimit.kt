@@ -13,9 +13,16 @@ fun Application.configureRateLimit() {
                 refillPeriod = 1.seconds,
             )
         }
+        register(RateLimitName(RateLimitKey.FACTS)) {
+            rateLimiter(
+                limit = 64,
+                refillPeriod = 1.seconds,
+            )
+        }
     }
 }
 
 object RateLimitKey {
     const val QUESTIONS = "questionsLimit"
+    const val FACTS = "factsLimit"
 }

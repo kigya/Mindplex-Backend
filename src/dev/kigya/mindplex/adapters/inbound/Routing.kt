@@ -1,5 +1,6 @@
 package dev.kigya.mindplex.adapters.inbound
 
+import dev.kigya.mindplex.domain.service.FactService
 import dev.kigya.mindplex.domain.service.QuestionService
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -8,7 +9,10 @@ import io.ktor.server.plugins.swagger.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
-fun Application.configureRouting(questionService: QuestionService) {
+fun Application.configureRouting(
+    questionService: QuestionService,
+    factService: FactService,
+) {
     routing {
         get("/") {
             call.respondRedirect("swagger")
@@ -24,6 +28,14 @@ fun Application.configureRouting(questionService: QuestionService) {
                 call.response.headers.append(HttpHeaders.CacheControl, "public, max-age=36000")
                 val questions = questionService.getAllQuestions()
                 call.respond(questions)
+            }
+        }
+
+        rateLimit(RateLimitName(RateLimitKey.FACTS)) {
+            get("/facts") {
+                val limitParam = call.request.queryParameters["limit"]?.toIntOrNull()
+                val facts = factService.getFacts(limitParam)
+                call.respond(facts)
             }
         }
     }
