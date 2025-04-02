@@ -13,6 +13,7 @@ dependencies:
     - $libs.ktor.server.netty
     - $libs.ktor.server.rate.limit
     - $libs.ktor.server.openapi
+    - $libs.ktor.server.cors
     - $libs.swagger.server.swagger
     - $libs.logback.classic
     - $libs.ktor.server.config.yaml

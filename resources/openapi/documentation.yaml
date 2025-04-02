@@ -9,6 +9,8 @@ info:
     email: "kirillborichevskiy@gmail.com"
 
 servers:
+  - url: http://localhost:8080
+    description: Local dev
   - url: https://mindplex-backend.onrender.com
     description: Render server
 
@@ -28,6 +30,29 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Question'
+  /facts:
+    get:
+      tags:
+        - "Facts"
+      summary: "Get Facts"
+      description: "Returns a list of facts. Optional query parameter 'limit' defines the maximum number of facts to return (default is 3)."
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            default: 3
+          description: "Optional limit on the number of facts returned"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Fact'
 
 components:
   schemas:
@@ -48,3 +73,8 @@ components:
           type: array
           items:
             type: string
+    Fact:
+      type: object
+      properties:
+        fact:
+          type: string
