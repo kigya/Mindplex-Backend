@@ -17,6 +17,10 @@ dependencies:
     - $libs.swagger.server.swagger
     - $libs.logback.classic
     - $libs.ktor.server.config.yaml
+    - $libs.ktor.client.cio
+    - $libs.ktor.client.content.negotiation
+    - $libs.koin.ktor
+    - $libs.koin.logger
 
 test-dependencies:
     - $libs.ktor.server.test.host
