@@ -53,6 +53,24 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Fact'
+  /country:
+    get:
+      tags:
+        - "Country"
+      summary: "Get Country Code"
+      description: >
+        Returns a country code based on the client's IP address.
+        The endpoint retrieves the remote host IP from the request
+        and uses it to fetch the corresponding country code.
+      responses:
+        '200':
+          description: "Successful response, returns the country code."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountryCode'
+        '502':
+          description: "Bad Gateway - Failed to get country code."
 
 components:
   schemas:
@@ -77,4 +95,9 @@ components:
       type: object
       properties:
         fact:
+          type: string
+    CountryCode:
+      type: object
+      properties:
+        countryCode:
           type: string
