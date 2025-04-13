@@ -21,6 +21,7 @@ dependencies:
     - $libs.ktor.client.content.negotiation
     - $libs.koin.ktor
     - $libs.koin.logger
+    - $libs.ktor.server.forwarded.header
 
 test-dependencies:
     - $libs.ktor.server.test.host

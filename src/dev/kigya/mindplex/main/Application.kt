@@ -4,6 +4,7 @@ import dev.kigya.mindplex.adapters.inbound.*
 import dev.kigya.mindplex.di.appModule
 import io.ktor.server.application.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.forwardedheaders.*
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
 
@@ -16,6 +17,8 @@ fun Application.module() {
         slf4jLogger()
         modules(modules = listOf(appModule))
     }
+
+    install(ForwardedHeaders)
 
     configureSerialization()
     configureMonitoring()
