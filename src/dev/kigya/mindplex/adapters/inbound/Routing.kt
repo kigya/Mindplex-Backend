@@ -45,7 +45,13 @@ fun Application.configureRouting() {
 
         rateLimit(RateLimitName(RateLimitKey.COUNTRY)) {
             get("/country") {
-                val ip = call.request.headers[HttpHeaders.XForwardedFor] ?: call.request.origin.remoteHost
+                val ip = call.request.headers[HttpHeaders.XForwardedFor]
+                    ?.split(",")
+                    ?.firstOrNull()
+                    ?.trim()
+                    ?: call.request.headers["X-Real-IP"]
+                    ?: call.request.origin.remoteHost
+
                 try {
                     val countryCode = countryCodeService.getCountryCode(ip)
                     call.respond(countryCode)
