@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'mindplex_local'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+
+  - job_name: 'mindplex_remote'
+    scheme: https
+    static_configs:
+      - targets: ['mindplex-backend.onrender.com']
