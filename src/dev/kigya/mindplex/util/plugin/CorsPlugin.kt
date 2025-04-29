@@ -13,6 +13,7 @@ fun Application.configureCORS() {
 
         allowMethod(HttpMethod.Get)
         allowMethod(HttpMethod.Post)
+        allowMethod(HttpMethod.Patch)
 
         allowHeader(HttpHeaders.ContentType)
         allowHeader(HttpHeaders.Authorization)

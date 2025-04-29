@@ -8,15 +8,18 @@ tasks.register<Jar>("buildFatJar") {
     archiveFileName.set("app-all.jar")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
+    from({
+        configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) }
+    })
+
+    from({
+        configurations.runtimeClasspath.get().filter { it.name.endsWith(".jar") }.map(::zipTree)
+    }) {
+        include("META-INF/services/**")
+        into("META-INF/services")
+    }
+
     manifest {
         attributes["Main-Class"] = mainClass
     }
-
-    from({
-        configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) }
-    }) {
-        exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
-    }
-
-    with(tasks.jar.get())
 }
