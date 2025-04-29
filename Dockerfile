@@ -1,17 +1,16 @@
 FROM openjdk:17-jdk-slim
 
 WORKDIR /src
-COPY . /src
+
+COPY . .
 
 RUN apt-get update \
- && apt-get install -y dos2unix \
+ && apt-get install -y --no-install-recommends dos2unix \
  && dos2unix gradlew \
  && chmod +x gradlew \
- && ./gradlew buildFatJar --no-daemon
-
-WORKDIR /run
-COPY /src/build/libs/app-all.jar server.jar
+ && ./gradlew buildFatJar --no-daemon \
+ && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 8080
 
-CMD ["java", "-jar", "server.jar"]
+CMD ["java","-jar","/src/build/libs/app-all.jar"]
