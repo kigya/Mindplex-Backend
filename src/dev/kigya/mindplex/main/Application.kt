@@ -7,45 +7,46 @@ import dev.kigya.mindplex.api.routing.rate.configureRateLimit
 import dev.kigya.mindplex.di.appModule
 import dev.kigya.mindplex.util.plugin.*
 import io.ktor.server.application.*
-import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.ktor.server.resources.Resources
+import io.ktor.server.resources.*
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
 
-fun main() {
-    embeddedServer(Netty, port = 8080) {
-        val hocon = ConfigFactory
-            .parseResources("application.conf")
-            .withFallback(ConfigFactory.systemEnvironment())
-            .resolve()
+fun main(args: Array<String>) {
+    EngineMain.main(args = args)
+}
 
-        val jwtSecret = hocon.getString("jwt.secret")
-        val jwtIssuer = hocon.getString("jwt.issuer")
+fun Application.module() {
+    val hocon = ConfigFactory
+        .parseResources("application.conf")
+        .withFallback(ConfigFactory.systemEnvironment())
+        .resolve()
 
-        install(Resources)
-        install(Koin) {
-            properties(
-                mapOf(
-                    "jwt.secret" to jwtSecret,
-                    "jwt.issuer" to jwtIssuer
-                )
+    val jwtSecret = hocon.getString("jwt.secret")
+    val jwtIssuer = hocon.getString("jwt.issuer")
+
+    install(Resources)
+    install(Koin) {
+        properties(
+            mapOf(
+                "jwt.secret" to jwtSecret,
+                "jwt.issuer" to jwtIssuer
             )
+        )
 
-            slf4jLogger()
-            modules(appModule)
-        }
+        slf4jLogger()
+        modules(appModule)
+    }
 
-        configureFirebase()
-        configureAuthentication()
+    configureFirebase()
+    configureAuthentication()
 
-        configureCORS()
-        configureRateLimit()
-        configureMonitoring()
-        configureSerialization()
-        configureStatusPages()
-        configureMicrometer()
+    configureCORS()
+    configureRateLimit()
+    configureMonitoring()
+    configureSerialization()
+    configureStatusPages()
+    configureMicrometer()
 
-        configureRouting()
-    }.start(wait = true)
+    configureRouting()
 }

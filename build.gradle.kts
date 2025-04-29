@@ -13,8 +13,10 @@ tasks.register<Jar>("buildFatJar") {
     }
 
     from({
-        configurations.runtimeClasspath.get()
-            .map { if (it.isDirectory) it else zipTree(it) }
-    })
+        configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) }
+    }) {
+        exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
+    }
+
     with(tasks.jar.get())
 }
