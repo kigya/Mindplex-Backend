@@ -4,9 +4,8 @@ info:
   description: Backend for Mindplex-Multiplatform App
   version: "1.0.0"
   contact:
-    name: "Mindplex Support"
-    url: ""
-    email: "kirillborichevskiy@gmail.com"
+    name: Mindplex Support
+    email: kirillborichevskiy@gmail.com
 
 servers:
   - url: http://localhost:8080
@@ -14,67 +13,33 @@ servers:
   - url: https://mindplex-backend.onrender.com
     description: Render server
 
-paths:
-  /questions:
-    get:
-      tags:
-        - "Questions"
-      summary: "Get Questions"
-      description: "Returns a list of questions."
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Question'
-  /facts:
-    get:
-      tags:
-        - "Facts"
-      summary: "Get Facts"
-      description: "Returns a list of facts. Optional query parameter 'limit' defines the maximum number of facts to return (default is 3)."
-      parameters:
-        - in: query
-          name: limit
-          required: false
-          schema:
-            type: integer
-            default: 3
-          description: "Optional limit on the number of facts returned"
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Fact'
-  /country:
-    get:
-      tags:
-        - "Country"
-      summary: "Get Country Code"
-      description: >
-        Returns a country code based on the client's IP address.
-        The endpoint retrieves the remote host IP from the request
-        and uses it to fetch the corresponding country code.
-      responses:
-        '200':
-          description: "Successful response, returns the country code."
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CountryCode'
-        '502':
-          description: "Bad Gateway - Failed to get country code."
-
 components:
+  parameters:
+    StageHeader:
+      name: X-Stage
+      in: header
+      description: "Specifies the application environment. Defaults to 'debug'. Use 'release' in production."
+      required: false
+      schema:
+        type: string
+
+    RealIPHeader:
+      name: X-Real-IP
+      in: header
+      description: "Overrides the client’s IP address for geolocation purposes."
+      required: false
+      schema:
+        type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "Mindplex API JWT – include as `Authorization: Bearer <token>`"
+
   schemas:
-    Question:
+    QuestionResponse:
       type: object
       properties:
         type:
@@ -85,19 +50,306 @@ components:
           type: string
         question:
           type: string
-        correct_answer:
+        correctAnswer:
           type: string
-        incorrect_answers:
+        incorrectAnswers:
           type: array
           items:
             type: string
-    Fact:
+      required:
+        - type
+        - difficulty
+        - category
+        - question
+        - correctAnswer
+        - incorrectAnswers
+
+    FactResponse:
       type: object
       properties:
         fact:
           type: string
-    CountryCode:
+      required:
+        - fact
+
+    UserPostRequest:
       type: object
       properties:
+        token:
+          type: string
+        displayName:
+          type: string
+        avatarUrl:
+          type: string
+      required:
+        - token
+        - displayName
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+      required:
+        - token
+
+    ScoreUpdateRequest:
+      type: object
+      properties:
+        delta:
+          type: integer
+      required:
+        - delta
+
+    ScoreUpdateResponse:
+      type: object
+      properties:
+        newScore:
+          type: integer
+      required:
+        - newScore
+
+    UserProfileResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        displayName:
+          type: string
+        avatarUrl:
+          type: string
+          nullable: true
         countryCode:
           type: string
+          nullable: true
+        score:
+          type: integer
+        globalRank:
+          type: integer
+        localRank:
+          type: integer
+          nullable: true
+      required:
+        - id
+        - displayName
+        - score
+        - globalRank
+
+    LeaderboardUserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        displayName:
+          type: string
+        avatarUrl:
+          type: string
+          nullable: true
+        countryCode:
+          type: string
+          nullable: true
+        score:
+          type: integer
+      required:
+        - id
+        - displayName
+        - score
+
+    GenerateDebugUserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        displayName:
+          type: string
+        avatarUrl:
+          type: string
+          nullable: true
+        countryCode:
+          type: string
+          nullable: true
+        score:
+          type: integer
+        mindplexToken:
+          type: string
+      required:
+        - id
+        - displayName
+        - score
+        - mindplexToken
+
+paths:
+  /questions:
+    parameters:
+      - $ref: '#/components/parameters/StageHeader'
+    get:
+      tags:
+        - Questions
+      summary: Get questions
+      description: Returns a list of trivia questions.
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: List of questions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuestionResponse'
+        '401':
+          description: Unauthorized
+
+  /facts:
+    parameters:
+      - $ref: '#/components/parameters/StageHeader'
+    get:
+      tags:
+        - Facts
+      summary: Get facts
+      description: Returns a list of facts. Optional `limit` query parameter defines how many to return.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 3
+          description: Maximum number of facts to return
+      responses:
+        '200':
+          description: List of facts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FactResponse'
+        '401':
+          description: Unauthorized
+
+  /user:
+    parameters:
+      - $ref: '#/components/parameters/StageHeader'
+      - $ref: '#/components/parameters/RealIPHeader'
+    post:
+      tags:
+        - User
+      summary: Authenticate or register a user
+      description: |
+        Accepts a Google ID token (JWT), a display name and optional avatar URL.
+        Verifies the token, upserts the user in Firestore and returns a Mindplex JWT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPostRequest'
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid Google ID token
+
+  /user/profile:
+    parameters:
+      - $ref: '#/components/parameters/StageHeader'
+      - $ref: '#/components/parameters/RealIPHeader'
+    get:
+      tags:
+        - User
+      summary: Get user profile
+      description: Returns the profile of the authenticated user.
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '401':
+          description: Unauthorized
+
+  /user/score:
+    parameters:
+      - $ref: '#/components/parameters/StageHeader'
+    patch:
+      tags:
+        - User
+      summary: Update user score
+      description: Updates the authenticated user's score by a delta.
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScoreUpdateRequest'
+      responses:
+        '200':
+          description: Score updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreUpdateResponse'
+        '401':
+          description: Unauthorized
+
+  /user/generate-debug:
+    parameters:
+      - $ref: '#/components/parameters/RealIPHeader'
+    get:
+      tags:
+        - User
+      summary: Generate debug user
+      description: |
+        Creates a random debug user in the DEBUG collection, persists it,
+        and returns its data along with a Mindplex JWT.
+      responses:
+        '201':
+          description: Debug user created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateDebugUserResponse'
+        '503':
+          description: Service unavailable
+
+  /leaderboard:
+    parameters:
+      - $ref: '#/components/parameters/StageHeader'
+    get:
+      tags:
+        - Leaderboard
+      summary: Get leaderboard
+      description: |
+        Returns top users by score. Optional `limit` query parameter defines how many entries to return.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: Maximum number of leaderboard entries to return
+      responses:
+        '200':
+          description: Leaderboard
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LeaderboardUserResponse'
+        '401':
+          description: Unauthorized

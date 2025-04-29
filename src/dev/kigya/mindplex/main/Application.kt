@@ -1,33 +1,51 @@
 package dev.kigya.mindplex.main
 
-import dev.kigya.mindplex.adapters.inbound.*
-import dev.kigya.mindplex.adapters.inbound.route.configureRouting
+import com.typesafe.config.ConfigFactory
+import dev.kigya.mindplex.api.auth.configureAuthentication
+import dev.kigya.mindplex.api.routing.configureRouting
+import dev.kigya.mindplex.api.routing.rate.configureRateLimit
 import dev.kigya.mindplex.di.appModule
+import dev.kigya.mindplex.util.plugin.*
 import io.ktor.server.application.*
+import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.ktor.server.plugins.forwardedheaders.*
+import io.ktor.server.resources.Resources
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
-import io.ktor.server.resources.Resources
 
-fun main(args: Array<String>) {
-    EngineMain.main(args)
-}
+fun main() {
+    embeddedServer(Netty, port = 8080) {
+        val hocon = ConfigFactory
+            .parseResources("application.conf")
+            .withFallback(ConfigFactory.systemEnvironment())
+            .resolve()
 
-fun Application.module() {
-    install(Resources)
-    install(Koin) {
-        slf4jLogger()
-        modules(modules = listOf(appModule))
-    }
+        val jwtSecret = hocon.getString("jwt.secret")
+        val jwtIssuer = hocon.getString("jwt.issuer")
 
-    install(ForwardedHeaders)
+        install(Resources)
+        install(Koin) {
+            properties(
+                mapOf(
+                    "jwt.secret" to jwtSecret,
+                    "jwt.issuer" to jwtIssuer
+                )
+            )
 
-    configureSerialization()
-    configureMonitoring()
-    configureRateLimit()
-    configureCORS()
-    configureMicrometer()
-    configureRouting()
-    configureStatusPages()
+            slf4jLogger()
+            modules(appModule)
+        }
+
+        configureFirebase()
+        configureAuthentication()
+
+        configureCORS()
+        configureRateLimit()
+        configureMonitoring()
+        configureSerialization()
+        configureStatusPages()
+        configureMicrometer()
+
+        configureRouting()
+    }.start(wait = true)
 }
