@@ -8,10 +8,10 @@ info:
     email: kirillborichevskiy@gmail.com
 
 servers:
-  - url: http://localhost:8080
-    description: Local dev
   - url: https://mindplex-backend.onrender.com
     description: Render server
+  - url: http://localhost:8080
+    description: Local dev
 
 components:
   parameters:
