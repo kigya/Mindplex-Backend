@@ -14,7 +14,10 @@ import dev.kigya.mindplex.infrastructure.http.HttpCountryCodeRepository
 import dev.kigya.mindplex.infrastructure.http.HttpRandomUserRepository
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 import org.koin.dsl.bind
@@ -31,6 +34,9 @@ val appModule = module {
                         ignoreUnknownKeys = true
                     }
                 )
+            }
+            defaultRequest {
+                header(HttpHeaders.UserAgent, "Mozilla/5.0")
             }
         }
     }
