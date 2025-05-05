@@ -16,9 +16,9 @@ import dev.kigya.mindplex.domain.usecase.IncrementScoreUseCase
 import dev.kigya.mindplex.domain.usecase.UpsertUserUseCase
 import dev.kigya.mindplex.util.extension.callIp
 import dev.kigya.mindplex.util.extension.stage
+import dev.kigya.mindplex.util.extension.userId
 import io.ktor.http.*
 import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
 import io.ktor.server.plugins.ratelimit.*
 import io.ktor.server.request.*
 import io.ktor.server.resources.*
@@ -47,7 +47,7 @@ fun Route.userRoutes(
 
             val googleUid = idToken.payload.subject
 
-            val env = call.stage()
+            val env = call.stage
             upsertUserUseCase(
                 stage = env,
                 id = googleUid,
@@ -64,9 +64,8 @@ fun Route.userRoutes(
     rateLimit(RateLimitName(RateLimitKey.USER_PROFILE)) {
         authenticate(JWT_MINDPLEX_AUTH_KEY) {
             get<UserResource.ProfileResource> {
-                val principal = call.principal<JWTPrincipal>()!!
-                val uid = principal.payload.subject
-                val env = call.stage()
+                val uid = call.userId
+                val env = call.stage
                 val profile = getUserProfileUseCase(env, uid, callIp).toResponse()
                 call.respond(profile)
             }
@@ -76,10 +75,9 @@ fun Route.userRoutes(
     rateLimit(RateLimitName(RateLimitKey.USER_SCORE)) {
         authenticate(JWT_MINDPLEX_AUTH_KEY) {
             patch<UserResource.ScoreResource> {
-                val principal = call.principal<JWTPrincipal>()!!
-                val uid = principal.payload.subject
+                val uid = call.userId
                 val delta = call.receive<ScoreUpdateRequest>().delta
-                val env = call.stage()
+                val env = call.stage
                 val newScore = incrementScoreUseCase(env, uid, delta)
                 call.respond(newScore.toResponse())
             }

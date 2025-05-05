@@ -19,7 +19,7 @@ fun Application.configureAuthentication() {
             verifier(jwtService.verifier)
             validate { cred: JWTCredential ->
                 val uid = cred.payload.subject
-                val user = findUserByIdUseCase(stage(), uid)
+                val user = findUserByIdUseCase(stage, uid)
                 if (user != null) JWTPrincipal(cred.payload)
                 else null
             }
