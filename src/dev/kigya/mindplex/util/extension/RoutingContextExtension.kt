@@ -13,8 +13,3 @@ val RoutingContext.callIp: String
         ?.trim()
         ?: call.request.headers[HttpHeaders.XRealIP]
         ?: call.request.origin.remoteHost
-
-fun RoutingContext.getUserId(): String? {
-    val principal = call.principal<UserIdPrincipal>()
-    return principal?.name
-}

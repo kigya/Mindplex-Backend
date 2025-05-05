@@ -17,7 +17,7 @@ fun Route.leaderboardRoutes(getLeaderboardUseCase: GetLeaderboardUseCase) {
     rateLimit(RateLimitName(RateLimitKey.LEADERBOARD)) {
         authenticate(JWT_MINDPLEX_AUTH_KEY) {
             get<LeaderboardResource> { resource ->
-                val env = call.stage()
+                val env = call.stage
                 val limit = resource.limit
                 val users = getLeaderboardUseCase(env, limit)
                     .map(UserEntity::toLeaderboardResponse)
