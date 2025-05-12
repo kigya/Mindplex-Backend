@@ -47,6 +47,7 @@ fun Application.module() {
     configureSerialization()
     configureStatusPages()
     configureMicrometer()
+    configureRequestValidation()
 
     configureRouting()
 }

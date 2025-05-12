@@ -8,7 +8,6 @@ koin-version = "4.0.4"
 prometheus-version = "1.10.3"
 firebase-version = "9.4.3"
 coroutines-version = "1.10.2"
-google-api-client-oauth2-version = "1.2.3-alpha"
 google-api-client-version = "2.7.2"
 google-http-client-version = "1.41.8"
 
