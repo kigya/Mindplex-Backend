@@ -48,6 +48,7 @@ fun Application.module() {
     configureStatusPages()
     configureMicrometer()
     configureRequestValidation()
+    configureCompression()
 
     configureRouting()
 }
